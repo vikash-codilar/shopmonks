@@ -30,21 +30,8 @@ class ExcelController extends Controller
                 $excel[] = $rowData[0];
             }
         });
-        // dd($excel);
-        $limit = 4;
-        $qty   = 0;
-        $box   = 1;
-        $tc    = $excel[3][4];       // first time count
-        $invoiceno   = $excel[0][3]; // first time count
-        $palletid    = $excel[2][1]; // Pallet Id
-        $productcode = $excel[3][1]; // Product Code
-        $description = $excel[3][2]; // product description
-        $model       = "";
-        $storage     = "";
-        $color       = "";
-        $allrecords  = [];
 
-        $lim = 3;
+        $allrecords  = [];
         $index = 0;
         $qty_index = 3;
         $pallet_index = 2;
@@ -56,71 +43,36 @@ class ExcelController extends Controller
         $model = '';
         $color = '';
         $storage = '';
+        $product_details = [];
 
         foreach ($excel as $value) {
             if($index > 1){
-                if($index == $pallet_index){
-                    // echo($value[1].'<br>');
+                if($index == $pallet_index)
                     $pallet_id = $value[1];
-                }
 
                 else if($index == $qty_index){
-                    // echo ('<br>');
-                    // echo($value[0].'<br>');
                     $product_code = $value[1];
-                    // echo($value[1].'<br>');
-                    // echo($value[2].'<br>');
                     $description = $value[2]; 
                     $model_description = [];
                     $model_description = explode("(",$value[2]);
-
                     $color = (! isset($model_description[1]))?'NA':rtrim($model_description[1],')');
-
-                   
-
-                    // echo rtrim($model_description[1],')').'<br>';
-                    // $color = rtrim($model_description[1],')');
-
-                    // echo rtrim($model_description[0]);
-                    
                     $model_name_with_memory = [];
-                    $model_name_with_memory = explode(" ",rtrim($model_description[0]));
-                    // dd(sizeof($model_name_with_memory));
-                    // echo($model_name_with_memory[]);
-                    $storage = $model_name_with_memory[sizeof($model_name_with_memory)-1];
-                    
+                    $model_name_with_memory = (! isset($model_description[0]))?'NA':explode(" ",rtrim($model_description[0]));
+                    $storage = (! isset($model_name_with_memory))?'NA':$model_name_with_memory[sizeof($model_name_with_memory)-1];
                     $model = rtrim(str_replace($storage,"",rtrim($model_description[0])));
-
-                    // dd($model);
-// dd($model_description);
-
-                    // $model_description = explode(" ",$value[2]);
-                    // $model = $model_description[0]." ".$model_description[1];
-                    // $color = explode("(",$model_description[2])[0];
-                    // $storage = rtrim(explode("(",$model_description[2])[1],')');
-
-
-                    // dd(rtrim(explode("(",$model_description[2])[1],')'));
-                    // echo($value[3].'<br>');
-                    // echo($value[4].'<br>');
-
-//                     array:3 [▼
-                    //   0 => "iPhone"
-                    //   1 => "4S"
-                    //   2 => "16GB(Black)"
-                    // ]
-
                     $qty_index += ($value[4] +2);
                     $pallet_index += ($value[4]+2);  
-                    // echo ('<br>');
                     $box_id = 1;
-                    // echo ($pallet_index.'<br>');
-                    // echo($qty_index.'<br>');
 
+                    $product_details[] = array(
+                                                'productcode'=>$product_code,
+                                                'model'=>$model,
+                                                'color'=>$color ,
+                                                'storage'=>$storage
+                                              );
                 }
 
                 else{
-                    // echo($value[0].'<br>');
                     $allrecords[] = array(
                                             'imei'=>$value[0],
                                             'product_code'=>$product_code,
@@ -135,78 +87,24 @@ class ExcelController extends Controller
                     $box_id++;
                 }
             }
-
             $index++;
         }
 
         if(!empty($allrecords)){
-            $srcarr=array_chunk($allrecords,5000);
-            foreach($srcarr as $item) {
+            $data=array_chunk($allrecords,5000);
+            foreach($data as $item) {
                 DB::table('excel_sheets')->insert($item);
             }
-            dd($allrecords);
+            // dd($product_details);
         }
 
-        dd($allrecords);
-
-        // $initial_count = 4;
-        // $count = $excel[3][4];
-        // $p = 1;
-
-        echo "Box No: ".$box.'<br>';
-        $arr = (array)$this->getProductdetails($productcode);
-        $allrecords =[];
-        for ($exrow = $limit; $exrow <= sizeof($excel); $exrow++){
-            $qty++;
-            //echo $qty."-".$tc;
-                if($excel[$exrow][0]!=''){
-                    if($qty==$tc+1 || $qty==$tc+2){
-                        // echo"<br/>";
-                        if($qty==($tc+2)){
-                            // echo "Box No: ".++$box.'<br/>';
-                            $tc+= ($excel[$exrow][4]+2);
-                            // echo $productcode = $excel[$exrow][1];
-                            $arr = (array)$this->getProductdetails($productcode);
-                            // echo"<br/>";
-                        }
-                    }else{
-                        
-                        // if($excel[$exrow][0][4] != ""){
-                        //     $temp_e = $e;
-                        //     echo ($e).' if E <br>';
-                        //     echo ($pallet_box_index == $i);
-                        // }
-
-                        // $allrecords[] = array_merge(array('imei'=>$excel[$exrow][0],'product_code'=>$productcode,'invoice_no'=>$invoiceno,'pallet_id'=>$palletid,'box_id'=>$box,'description'=>$description),$arr);
-                        // echo"<br/>";
-                       
-                        
-                    }
-                }else{
-                    break;
-                }
-        }
-        dd($allrecords);
-         //dd('Read all records successfully.');
-        
-        if(!empty($allrecords)){
-            $srcarr=array_chunk($allrecords,5000);
-            foreach($srcarr as $item) {
-                // DB::table('excel_sheets')->insert($item);
+        if(!empty($product_details)){
+            $data=array_chunk($product_details,5000);
+            foreach($data as $item) {
+                DB::table('product_detail')->insert($item);
             }
-            dd('Insert Recorded successfully.');
+            dd($product_details);
         }
-     
- }
-
-
- public function getProductdetails($productcode){
-    // $productdetails = DB::table('product_detail')->where('productcode', $productcode)->first(['model', 'color','storage']);
-    // if(!empty((array)$productdetails)){
-    //     return $productdetails;
-    // }else{
-        return array('model'=>'NA','color'=>'NA','storage'=>'NA');
-    // }
 }
 
     /**
