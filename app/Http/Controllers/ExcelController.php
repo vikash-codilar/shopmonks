@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Excel;
 use DB;
 use App\ExcelSheet;
+ini_set('max_execution_time', 180);
+ini_set('max_input_time', 300);
 
 class ExcelController extends Controller
 {
@@ -81,36 +83,17 @@ class ExcelController extends Controller
                     $pallet_index += ($value[4]+2);  
                     $box_id = 1;
 
-                    $product_details[] = array(
-                                                'productcode'=>$product_code,
-                                                'model'=>$model,
-                                                'color'=>$color ,
-                                                'storage'=>$storage,
-                                                'created_at'=>date("Y-m-d h:i:s"),
-                                                'updated_at'=>date("Y-m-d h:i:s")
-                                              );
+                    $product_details[] = $this->productDetails($product_code, $model, $color, $storage);
                 }
 
                 else{
-                    $all_records[] = array(
-                                            'imei'=>$value[0],
-                                            'product_code'=>$product_code,
-                                            'invoice_no'=>$invoice_no,
-                                            'pallet_id'=>$pallet_id,
-                                            'box_id'=>$box_id,
-                                            'description'=>$description,
-                                            'model'=>$model,
-                                            'color'=>$color ,
-                                            'storage'=>$storage,
-                                            'created_at'=>date("Y-m-d h:i:s"),
-                                            'updated_at'=>date("Y-m-d h:i:s"),
-                                        );
+                    $all_records[] = $this->allRecord($value[0], $product_code, $invoice_no, $pallet_id, $box_id, $description, $model, $color, $storage);
+                    
                     $box_id++;
                 }
             }
             $index++;
         }
-
         $this->store($all_records, $product_details);
        
 }
@@ -122,6 +105,36 @@ class ExcelController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
+    public function productDetails($product_code, $model, $color, $storage)
+    {
+        return array(
+                        'productcode'=>$product_code,
+                        'model'=>$model,
+                        'color'=>$color ,
+                        'storage'=>$storage,
+                        'created_at'=>date("Y-m-d h:i:s"),
+                        'updated_at'=>date("Y-m-d h:i:s")
+                    );
+    }
+
+    public function allRecord($imei, $product_code, $invoice_no, $pallet_id, $box_id, $description, $model, $color, $storage)
+    {
+        return array(
+                        'imei'=>$imei,
+                        'product_code'=>$product_code,
+                        'invoice_no'=>$invoice_no,
+                        'pallet_id'=>$pallet_id,
+                        'box_id'=>$box_id,
+                        'description'=>$description,
+                        'model'=>$model,
+                        'color'=>$color ,
+                        'storage'=>$storage,
+                        'created_at'=>date("Y-m-d h:i:s"),
+                        'updated_at'=>date("Y-m-d h:i:s"),
+                    );
+    }
+
     public function store($all_records, $product_details)
     {
         if(!empty($all_records)){
