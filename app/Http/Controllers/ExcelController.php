@@ -65,12 +65,18 @@ class ExcelController extends Controller
                     $product_code = $value[1];
                     $description = $value[2]; 
                     $model_description = [];
-                    $model_description = explode("(",$value[2]);
-                    $color = (! isset($model_description[1]))?'NA':rtrim($model_description[1],')');
+                    $model_description = explode("(",strrev($value[2]),2);
+
+                    $color = (! isset($model_description[0]))?'NA':rtrim(strrev($model_description[0]),')');
+
                     $model_name_with_memory = [];
-                    $model_name_with_memory = (! isset($model_description[0]))?'NA':explode(" ",rtrim($model_description[0]));
-                    $storage = (! isset($model_name_with_memory))?'NA':$model_name_with_memory[sizeof($model_name_with_memory)-1];
-                    $model = rtrim(str_replace($storage,"",rtrim($model_description[0])));
+                    $model_name_with_memory = (! isset($model_description[1]))?'NA':rtrim(strrev($model_description[1]));
+                    
+                    $model_name_with_memory_arr = [];
+                    $model_name_with_memory_arr = explode(' ', strrev($model_name_with_memory), 2);
+                    $storage = (! isset($model_name_with_memory_arr[0]))?'NA':strrev($model_name_with_memory_arr[0]);
+                    $model = (! isset($model_name_with_memory_arr[1]))?'NA':strrev($model_name_with_memory_arr[1]);
+                    
                     $qty_index += ($value[4] +2);
                     $pallet_index += ($value[4]+2);  
                     $box_id = 1;
