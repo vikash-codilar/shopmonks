@@ -85,7 +85,9 @@ class ExcelController extends Controller
                                                 'productcode'=>$product_code,
                                                 'model'=>$model,
                                                 'color'=>$color ,
-                                                'storage'=>$storage
+                                                'storage'=>$storage,
+                                                'created_at'=>date("Y-m-d h:i:s"),
+                                                'updated_at'=>date("Y-m-d h:i:s")
                                               );
                 }
 
@@ -99,7 +101,9 @@ class ExcelController extends Controller
                                             'description'=>$description,
                                             'model'=>$model,
                                             'color'=>$color ,
-                                            'storage'=>$storage
+                                            'storage'=>$storage,
+                                            'created_at'=>date("Y-m-d h:i:s"),
+                                            'updated_at'=>date("Y-m-d h:i:s"),
                                         );
                     $box_id++;
                 }
