@@ -14,7 +14,19 @@ class ExcelController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+
+    public function index()
+    {
+        return view('excel');
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public function create(Request $request)
     {
 
         Excel::load($request->file('sample_file')->getRealPath(), function($reader) use (&$excel) {
@@ -25,13 +37,12 @@ class ExcelController extends Controller
             //  Loop through each row of the worksheet in turn
             for ($row = 1; $row <= $highestRow; $row++){
                 //  Read a row of data into an array
-                $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row,
-                    NULL, TRUE, FALSE);
+                $rowData = $sheet->rangeToArray('A' . $row . ':' . $highestColumn . $row, NULL, TRUE, FALSE);
                 $excel[] = $rowData[0];
             }
         });
 
-        $allrecords  = [];
+        $all_records  = [];
         $index = 0;
         $qty_index = 3;
         $pallet_index = 2;
@@ -73,7 +84,7 @@ class ExcelController extends Controller
                 }
 
                 else{
-                    $allrecords[] = array(
+                    $all_records[] = array(
                                             'imei'=>$value[0],
                                             'product_code'=>$product_code,
                                             'invoice_no'=>$invoice_no,
@@ -90,8 +101,21 @@ class ExcelController extends Controller
             $index++;
         }
 
-        if(!empty($allrecords)){
-            $data=array_chunk($allrecords,5000);
+        $this->store($all_records, $product_details);
+       
+}
+   
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store($all_records, $product_details)
+    {
+        if(!empty($all_records)){
+            $data=array_chunk($all_records,5000);
             foreach($data as $item) {
                 DB::table('excel_sheets')->insert($item);
             }
@@ -105,27 +129,6 @@ class ExcelController extends Controller
             }
             dd($product_details);
         }
-}
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return view('excel');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**

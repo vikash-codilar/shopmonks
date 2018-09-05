@@ -11,17 +11,7 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', 'ExcelController@index');
 
-Route::get('/excel', 'ExcelController@create');
+Route::post('/excel', 'ExcelController@create')->name('import.file');
 
-Route::post('/excel1', 'ExcelController@index')->name('import.file');
-
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-//  Route::get('import-export-view', 'ExcelController@importExportView')->name('import.export.view');
-//  Route::post('import-file', 'ExcelController@importFile')->name('import.file');
-//  Route::get('export-file/{type}', 'ExcelController@exportFile')->name('export.file'); 
