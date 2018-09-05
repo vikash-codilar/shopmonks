@@ -18,7 +18,7 @@
 
 <div class="panel panel-primary">
 
- <div class="panel-heading">Laravel 5.5 - import export data into excel and csv using maatwebsite </div>
+ <div class="panel-heading">Import data from excel</div>
 
   <div class="panel-body"> 
 
